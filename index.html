@@ -1,1 +1,371 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HelpDesk Pro | Suporte de TI</title>
+
+<style>
+:root {
+  --bg: #f3f6fb;
+  --card: #ffffff;
+  --primary: #2457d6;
+  --text: #182338;
+  --muted: #68758b;
+  --border: #e3e9f2;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+header {
+  background: #14213d;
+  color: white;
+  padding: 22px 16px;
+}
+.header-inner, main {
+  width: min(1100px, 100%);
+  margin: auto;
+}
+header h1 { margin: 0 0 7px; font-size: 25px; }
+header p { margin: 0; color: #c5d3f2; font-size: 14px; }
+main { padding: 22px 16px 40px; }
+h2 { font-size: 19px; margin: 0 0 16px; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.stat, .panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 17px;
+}
+.stat span { color: var(--muted); font-size: 13px; }
+.stat strong { display: block; font-size: 28px; margin-top: 10px; }
+.panel { margin-bottom: 20px; }
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+}
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field.full { grid-column: 1 / -1; }
+label { font-size: 13px; font-weight: bold; }
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cfd8e7;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+  background: white;
+  color: var(--text);
+}
+textarea { min-height: 85px; resize: vertical; }
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+}
+.primary { background: var(--primary); color: white; }
+.secondary { background: #eaf0ff; color: #2049b0; }
+.danger { background: #fff0f0; color: #b42332; }
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr 180px 180px;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.ticket {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 10px;
+  background: white;
+}
+.ticket-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+.ticket h3 { font-size: 16px; margin: 0 0 7px; }
+.ticket p { font-size: 14px; line-height: 1.5; }
+.meta { color: var(--muted); font-size: 12px; line-height: 1.8; }
+.pill {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 20px;
+  background: #edf1f7;
+  font-size: 11px;
+  font-weight: bold;
+}
+.pill.open { background: #fff1cf; color: #875500; }
+.pill.progress { background: #e4edff; color: #214bb4; }
+.pill.done { background: #dcf8e7; color: #17683b; }
+.ticket-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.empty { color: var(--muted); text-align: center; padding: 25px 8px; }
+footer { text-align: center; color: var(--muted); font-size: 12px; padding: 15px; }
+@media (max-width: 650px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .toolbar { grid-template-columns: 1fr; }
+  form { grid-template-columns: 1fr; }
+  .field.full { grid-column: auto; }
+  .ticket-top { flex-direction: column; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="header-inner">
+    <h1>HelpDesk Pro</h1>
+    <p>Sistema de gerenciamento de chamados de TI</p>
+  </div>
+</header>
+
+<main>
+  <section class="stats">
+    <div class="stat"><span>Total de chamados</span><strong id="total">0</strong></div>
+    <div class="stat"><span>Abertos</span><strong id="open">0</strong></div>
+    <div class="stat"><span>Em andamento</span><strong id="progress">0</strong></div>
+    <div class="stat"><span>Resolvidos</span><strong id="done">0</strong></div>
+  </section>
+
+  <section class="panel">
+    <h2>Registrar chamado</h2>
+    <form id="ticketForm">
+      <div class="field">
+        <label for="requester">Nome do solicitante</label>
+        <input id="requester" maxlength="80" required
+          placeholder="Ex.: Maria Silva">
+      </div>
+      <div class="field">
+        <label for="category">Categoria</label>
+        <select id="category" required>
+          <option value="Computador">Computador</option>
+          <option value="Internet">Internet / Rede</option>
+          <option value="Impressora">Impressora</option>
+          <option value="Acesso">Acesso / Senha</option>
+          <option value="Software">Software</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label for="problem">Descrição do problema</label>
+        <textarea id="problem" maxlength="500" required
+          placeholder="Descreva o que aconteceu..."></textarea>
+      </div>
+      <div class="field">
+        <label for="priority">Prioridade</label>
+        <select id="priority">
+          <option value="Baixa">Baixa</option>
+          <option value="Média" selected>Média</option>
+          <option value="Alta">Alta</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="status">Status inicial</label>
+        <select id="status">
+          <option value="Aberto">Aberto</option>
+          <option value="Em andamento">Em andamento</option>
+          <option value="Resolvido">Resolvido</option>
+        </select>
+      </div>
+      <div class="field full">
+        <button class="primary" type="submit">+ Criar chamado</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Chamados registrados</h2>
+    <div class="toolbar">
+      <input id="search" aria-label="Pesquisar"
+        placeholder="Pesquisar solicitante ou problema...">
+      <select id="filterStatus" aria-label="Filtrar por status">
+        <option value="">Todos os status</option>
+        <option>Aberto</option>
+        <option>Em andamento</option>
+        <option>Resolvido</option>
+      </select>
+      <select id="filterPriority" aria-label="Filtrar por prioridade">
+        <option value="">Todas as prioridades</option>
+        <option>Alta</option>
+        <option>Média</option>
+        <option>Baixa</option>
+      </select>
+    </div>
+    <div id="ticketList" aria-live="polite"></div>
+  </section>
+</main>
+
+<footer>HelpDesk Pro • Projeto de portfólio acadêmico</footer>
+
+<script>
+const STORAGE_KEY = "helpdesk-pro-tickets-v1";
+
+const form = document.getElementById("ticketForm");
+const list = document.getElementById("ticketList");
+
+let tickets = [];
+
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  tickets = Array.isArray(saved) ? saved.filter(t =>
+    t && typeof t.id === "string" &&
+    typeof t.requester === "string" &&
+    typeof t.problem === "string" &&
+    ["Aberto", "Em andamento", "Resolvido"].includes(t.status) &&
+    ["Baixa", "Média", "Alta"].includes(t.priority)
+  ) : [];
+} catch {
+  tickets = [];
+}
+
+function saveTickets() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+  } catch {
+    alert("Não foi possível salvar. Verifique o armazenamento do navegador.");
+  }
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function render() {
+  document.getElementById("total").textContent = tickets.length;
+  document.getElementById("open").textContent =
+    tickets.filter(t => t.status === "Aberto").length;
+  document.getElementById("progress").textContent =
+    tickets.filter(t => t.status === "Em andamento").length;
+  document.getElementById("done").textContent =
+    tickets.filter(t => t.status === "Resolvido").length;
+
+  const query = document.getElementById("search").value.toLowerCase().trim();
+  const status = document.getElementById("filterStatus").value;
+  const priority = document.getElementById("filterPriority").value;
+
+  const filtered = tickets.filter(t => {
+    const matchesText = (t.requester + " " + t.problem + " " + t.category)
+      .toLowerCase().includes(query);
+    return matchesText &&
+      (!status || t.status === status) &&
+      (!priority || t.priority === priority);
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty">Nenhum chamado encontrado.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(t => {
+    const statusClass = t.status === "Aberto" ? "open" :
+      t.status === "Em andamento" ? "progress" : "done";
+
+    const nextStatus = t.status === "Aberto" ? "Em andamento" :
+      t.status === "Em andamento" ? "Resolvido" : "Aberto";
+
+    return `
+      <article class="ticket">
+        <div class="ticket-top">
+          <div>
+            <h3>#${escapeHTML(t.id.slice(-6))} — ${escapeHTML(t.category)}</h3>
+            <div class="meta">Solicitante: ${escapeHTML(t.requester)}</div>
+          </div>
+          <span class="pill ${statusClass}">${escapeHTML(t.status)}</span>
+        </div>
+        <p>${escapeHTML(t.problem).replace(/\n/g, "<br>")}</p>
+        <div class="meta">
+          Prioridade: <strong>${escapeHTML(t.priority)}</strong><br>
+          Criado em: ${escapeHTML(t.createdAt)}
+        </div>
+        <div class="ticket-actions">
+          <button class="secondary" data-action="next"
+            data-id="${escapeHTML(t.id)}">
+            Mover para: ${escapeHTML(nextStatus)}
+          </button>
+          <button class="danger" data-action="delete"
+            data-id="${escapeHTML(t.id)}">Excluir</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+form.addEventListener("submit", event => {
+  event.preventDefault();
+
+  const requester = document.getElementById("requester").value.trim();
+  const problem = document.getElementById("problem").value.trim();
+
+  if (!requester || !problem) {
+    alert("Preencha o nome e a descrição do problema.");
+    return;
+  }
+
+  tickets.unshift({
+    id: crypto.randomUUID(),
+    requester,
+    category: document.getElementById("category").value,
+    problem,
+    priority: document.getElementById("priority").value,
+    status: document.getElementById("status").value,
+    createdAt: new Date().toLocaleString("pt-BR")
+  });
+
+  saveTickets();
+  form.reset();
+  render();
+});
+
+list.addEventListener("click", event => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+
+  const ticket = tickets.find(t => t.id === button.dataset.id);
+  if (!ticket) return;
+
+  if (button.dataset.action === "delete") {
+    if (!confirm("Deseja excluir este chamado?")) return;
+    tickets = tickets.filter(t => t.id !== ticket.id);
+  } else if (button.dataset.action === "next") {
+    ticket.status = ticket.status === "Aberto" ? "Em andamento" :
+      ticket.status === "Em andamento" ? "Resolvido" : "Aberto";
+  }
+
+  saveTickets();
+  render();
+});
+
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("filterStatus").addEventListener("change", render);
+document.getElementById("filterPriority").addEventListener("change", render);
+
+render();
+</script>
+</body>
+</html>
